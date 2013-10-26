@@ -1,21 +1,5 @@
-def o(s):
-    l=len(s)
-    return len(set([a+b+c
-                    for a in s for b in s for c in s])
-               )==l*(l+1)*(l+2)//6
-M=int(input())
-N=3**M
-i=1
-s=M*[i]
-while i:
-    if s[i]-N:
-        s[i]=s[i]+1
-        if o(s[:i+1]):
-            if i<M-1:
-                i=i+1
-                s[i]=s[i-1]
-            else:
-                N=s[-1]
-    else:
-        i=i-1
-print(N)
+# This is the sequence given here, +1:
+# http://oeis.org/search?q=1%2C4%2C11%2C23%2C45&sort=&language=&go=Search
+x=int(input())
+arr=[0,0,1,4,11,23,45,82,129,208,309]
+print arr[x]+1
