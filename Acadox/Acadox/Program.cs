@@ -38,7 +38,7 @@ using System.Threading.Tasks;
                             return new Invalid();
                         if (t.Length > 4)
                             return new Invalid();
-                        if (UInt32.TryParse(t, NumberStyles.HexNumber, null, out value))
+                        if (UInt32.TryParse(t, NumberStyles.AllowHexSpecifier, null, out value))
                         {
                             return new Digit(value);
                         }
@@ -191,7 +191,7 @@ using System.Threading.Tasks;
             var fullString = Console.ReadLine();
             if (fullString.Trim() != fullString)
             {
-                Console.WriteLine("Error");
+                Console.WriteLine("ERROR");
                 return;
             }
             if (String.IsNullOrWhiteSpace(fullString))
@@ -204,8 +204,9 @@ using System.Threading.Tasks;
             if (tokens.Any(x => String.IsNullOrWhiteSpace(x)))
             {
                 Console.WriteLine("ERROR");
+                return;
             }
-            if (tokens.Length > 20)
+            if (tokens.Length == 1)
             {
                 Console.WriteLine("ERROR");
                 return;
