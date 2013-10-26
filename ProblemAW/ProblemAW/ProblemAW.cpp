@@ -5,17 +5,6 @@
 #include <vector>
 using namespace std;
 
-struct CipherCombination {
-	CipherCombination() : mapping() {}
-	set<char> mapping[26];
-	void insert(char c, char v) {
-		mapping[c].insert(v);
-	}
-	vector<Cipher> possibleCiphers() {
-		vector<Cipher> result;
-		Cipher cipher;
-	}
-};
 struct Cipher {
 	Cipher() : mapping() {}
 	char mapping[26];
@@ -35,15 +24,6 @@ struct Cipher {
 	}
 
 };
-
-Cipher& combine(const vector<Cipher>& ciphers) {
-	Cipher cipher;
-	for (Cipher cipher : ciphers) {
-		for (char c = 'A'; c <= 'Z'; ++c) {
-			if (cipher [c] != 0)
-		}
-	}
-}
 
 class Dictionary {
 private:
