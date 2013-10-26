@@ -1,0 +1,14 @@
+Possible Aligments: 25
+Alignment at Position: 1
+ACT
+GC-
+Alignment at Position: 9
+AC-T
+--GC
+Alignment at Position: 22
+-ACT-
+G---C
+Alignment at Position: 14
+-ACT
+G-C-
+There is no alignment at position: 32
