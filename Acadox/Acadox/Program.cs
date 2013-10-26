@@ -32,7 +32,8 @@ namespace Acadox
                         return new LogicalXor();
                     default:
                         uint value = 0;
-                        t = t.TrimStart(new [] { '0', 'x' }).ToUpper();
+                        if (t.StartsWith("0x"))
+                            t = t.Replace("0x", "");
                         if (t.Length > 4)
                             return new Invalid();
                         if (UInt32.TryParse(t, NumberStyles.HexNumber, null, out value))
@@ -41,7 +42,6 @@ namespace Acadox
                         }
                         return new Invalid();
                 }
-                return new Invalid();
             }
         }
 
