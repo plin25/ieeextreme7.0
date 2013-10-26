@@ -22,8 +22,16 @@ namespace Women
             public bool open = false;
         }
 
+        public class ScheduleEntry
+        {
+            public double departTime;
+            public double arriveTime;
+        }
+
         public class Train
         {
+            public List<ScheduleEntry> schedule = new List<ScheduleEntry>(); 
+
             public enum State
             {
                 New,
@@ -34,6 +42,7 @@ namespace Women
                 Accelerating,
                 Coasting,
                 Deccelerating,
+                Depot,
                 Done,
             }
 
@@ -53,13 +62,14 @@ namespace Women
             public double positionInSection = 0;
             public double velocity = 0;
             private bool blocked = false;
-
+            private double totalTime = 0;
+            public bool needsCorrection = false;
             public double TimeTillTransition()
             {
                 switch (state)
                 {
                     case State.New:
-                        return 0;
+                        return timeLeftInState;
                     case State.Done:
                         return Double.MaxValue;
                     case State.Waiting:
@@ -82,6 +92,8 @@ namespace Women
                         return TimeToTurnover(velocity, currentSection.length - positionInSection);
                     case State.Deccelerating:
                         return TimeToTravel(currentSection.length - positionInSection, velocity, deccellRate);
+                    case State.Depot:
+                        return timeLeftInState;
                     default:
                         throw new InvalidOperationException();
                 }
@@ -92,13 +104,18 @@ namespace Women
             {
                 if(time > TimeTillTransition())
                     throw new InvalidOperationException();
+                totalTime += time;
 
                 switch (state)
                 {
                     case State.New:
                         timeLeftInState -= time;
-                        if(Math.Abs(timeLeftInState) < TOLERANCE)
+                        if (Math.Abs(timeLeftInState) < TOLERANCE)
+                        {
+                            RoundingCorrect(Math.Max(0, Math.Round(totalTime) - totalTime));
+                            schedule.Add(new ScheduleEntry() { departTime = totalTime, arriveTime = -1 });
                             state = State.Leaving;
+                        }
                         break;
                     case State.Done:
                         return;
@@ -107,6 +124,8 @@ namespace Women
                             throw new InvalidOperationException();
                         if (currentSection.nextSection.open)
                         {
+                            RoundingCorrect(Math.Max(0, Math.Round(totalTime + 1) - totalTime));
+                            schedule.Add(new ScheduleEntry() { departTime = totalTime, arriveTime = -1 });
                             state = State.Ready;
                             oldSection = currentSection;
                             currentSection = currentSection.nextSection;
@@ -114,7 +133,7 @@ namespace Women
                             oldSection.currentTrain = null;
                             currentSection.open = false;
                             positionInSection = 0;
-                            timeLeftInState = blocked ? BUFFER_TIME : 0;
+                            timeLeftInState = BUFFER_TIME;
                         }
                         break;
                     case State.JustArrived:
@@ -132,6 +151,7 @@ namespace Women
                         if (Math.Abs(positionInSection - TRAIN_LENGTH) < TOLERANCE)
                         {
                             state = State.Accelerating;
+                            schedule.Last().departTime = totalTime;
                             if(oldSection != null)
                                 oldSection.open = true;
                         }
@@ -151,18 +171,33 @@ namespace Women
                         Integrate(time, deccellRate);
                         if (Math.Abs(velocity) < TOLERANCE)
                         {
+                            RoundingCorrect(Math.Max(0, Math.Floor(totalTime) - totalTime));
+                            schedule.Last().arriveTime = totalTime;
                             if (currentSection.nextSection == null)
-                                state = State.Done;
+                            {
+                                state = State.Depot;
+                                timeLeftInState = 1;
+                            }
                             else
                             {
                                 state = State.JustArrived;
-                                timeLeftInState = TIME_IN_STATION;                                
+                                timeLeftInState = TIME_IN_STATION;
                             }
                         }
+                        break;
+                    case State.Depot:
+                        timeLeftInState -= time;
+                        if(Math.Abs(timeLeftInState) < TOLERANCE)
+                            state = State.Done;
                         break;
                     default:
                         throw new InvalidOperationException();                    
                 }
+            }
+
+            public void RoundingCorrect(double time)
+            {
+                totalTime += time;
             }
 
             private void Integrate(double time, double accel)
@@ -344,7 +379,7 @@ namespace Women
                     trains.Add(t);
                     undepartedTrains.Push(t);
                 }
-                double totalTime = 1;
+                double totalTime = 0;
                 while (trainCount > 0)
                 {
                     if (sections.First().open && undepartedTrains.Count >= 1)
@@ -355,7 +390,7 @@ namespace Women
                         t.currentSection = sections.First();
                         t.currentSection.open = false;
                             t.state = Train.State.New;
-                            t.timeLeftInState = 0;
+                            t.timeLeftInState = 1;
                     }
 
                     var minTime =
@@ -375,7 +410,14 @@ namespace Women
                         trainCount--;
                     }
                 }
-                Console.WriteLine("1 : ***** -     1   {0} *****	", totalTime);
+                foreach (var train in trains.Reverse<Train>().Select((t, idx) => new {t, idx}))
+                {
+                    Console.WriteLine(
+                        String.Format("{0} : ***** - {1} *****",
+                        train.idx + 1,
+                        String.Join(" - ", train.t.schedule.Select(se => String.Format("{0,5:F0}  {1,5:}", se.departTime, se.arriveTime)))));
+                }
+                //Console.WriteLine("1 : ***** -     1   {0} *****	", totalTime);
             }
             catch
             {
