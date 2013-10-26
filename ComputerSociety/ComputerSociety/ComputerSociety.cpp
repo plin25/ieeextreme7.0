@@ -4,7 +4,7 @@ using namespace std;
 class LCG
 {
 private:
-	static const unsigned long long m = 1Ui64 << 48;
+	static const unsigned long long m = 1Ui64 << 32;
 	static const int a = 1664525;
 	static const int c = 1013904223;
 	int current;
