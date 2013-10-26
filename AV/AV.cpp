@@ -80,7 +80,11 @@ int main() {
 			}
 		}
 	}
-	cout << dist[start.first][start.second] << endl;
+	double minDist = dist[start.first][start.second];
+	if ( minDist < MAX_D )
+		cout << minDist << endl;
+	else
+		cout << "IMPOSSIBLE" << endl;
 	
 	return 0;
 }
