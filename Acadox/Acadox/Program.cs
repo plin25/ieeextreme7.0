@@ -16,7 +16,7 @@ namespace Acadox
 
             public static Token Parse(string t)
             {
-                switch (t)
+                switch (t.ToUpper())
                 {
                     case "+":
                         return new Addition();
@@ -34,6 +34,8 @@ namespace Acadox
                         uint value = 0;
                         if (t.StartsWith("0x"))
                             t = t.Replace("0x", "");
+                        if (t.StartsWith("0X"))
+                            t = t.Replace("0X", "");
                         if (t.Length > 4)
                             return new Invalid();
                         if (UInt32.TryParse(t, NumberStyles.HexNumber, null, out value))
