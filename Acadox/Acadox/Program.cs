@@ -6,9 +6,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Acadox
-{
-    class Program
+    class Solution
     {
         abstract class Token
         {
@@ -16,7 +14,7 @@ namespace Acadox
 
             public static Token Parse(string t)
             {
-                switch (t.ToUpper())
+                switch (t)
                 {
                     case "+":
                         return new Addition();
@@ -33,9 +31,11 @@ namespace Acadox
                     default:
                         uint value = 0;
                         if (t.StartsWith("0x"))
-                            t = t.Replace("0x", "");
+                            return new Invalid();
                         if (t.StartsWith("0X"))
-                            t = t.Replace("0X", "");
+                            return new Invalid();
+                        if (t.StartsWith("x") || t.StartsWith("X"))
+                            return new Invalid();
                         if (t.Length > 4)
                             return new Invalid();
                         if (UInt32.TryParse(t, NumberStyles.HexNumber, null, out value))
@@ -189,14 +189,22 @@ namespace Acadox
         static void Main(string[] args)
         {
             var fullString = Console.ReadLine();
+            if (fullString.Trim() != fullString)
+            {
+                Console.WriteLine("Error");
+                return;
+            }
             if (String.IsNullOrWhiteSpace(fullString))
             {
                 Console.WriteLine("ERROR");
                 return;
             }
-            char[] whitespace = {' ', '\t'};
+            char[] whitespace = {' '};
             string[] tokens = fullString.Split(whitespace);
-
+            if (tokens.Any(x => String.IsNullOrWhiteSpace(x)))
+            {
+                Console.WriteLine("ERROR");
+            }
             if (tokens.Length > 20)
             {
                 Console.WriteLine("ERROR");
@@ -225,4 +233,3 @@ namespace Acadox
             }
         }
     }
-}
